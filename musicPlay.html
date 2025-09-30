@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Music Player</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+
+  <style>
+    body{
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.6s;
+    }
+    .player{
+      height: 95vh;
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+      width: 450px;
+    }
+    .wrapper{
+      border: 1px solid transparent;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: rgba(0,0,0,0.3) 0px 19px 38px, rgba(0,0,0,0.22) 0px 15px 12px;
+      max-width:720px;
+      width:90%;
+      background: rgba(229, 212, 212, 0.95);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .wrapper:hover{
+      transform: translateY(-5px);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+    }
+    .details{
+      display: flex;
+      align-items: center;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .track-art{
+      margin: 25px;
+      height: 150px;
+      width: 150px;
+      border: 2px solid #fff;
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      box-shadow: 0px 6px 5px #ccc;
+    }
+    .now-playing{ 
+      font-size: 1.1rem; 
+      font-weight: 600; 
+    }
+    .track-name{ 
+      font-size: 2rem; 
+    }
+    .track-artist{ 
+      margin-top: 5px; 
+      font-size: 1rem; 
+      color:#444; 
+      margin-bottom: 10px; 
+    }
+    .buttons{ 
+      display: flex; 
+      gap: 10px; 
+      align-items: center; 
+      justify-content: center; 
+      margin-bottom: 20px; 
+    }
+    .playpause-track, 
+    .prev-track, 
+    .next-track, 
+    .random-track, 
+    .repeat-track {
+      padding: 10px;
+      cursor: pointer;
+      user-select:none;
+    }
+
+    .slider_container{ 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      justify-content: center; 
+      margin-bottom: 12px; 
+    }
+    .seek_slider, 
+    .volume_slider {
+      height: 5px;
+      background: #83a9ff;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .seek_slider { 
+      width: 60%; 
+    }
+    .volume_slider { 
+      width: 30%; 
+    }
+    .current-time, 
+    .total-duration { 
+      padding: 0 6px; 
+      font-size: 0.9rem; 
+    }
+
+    .wave{
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      align-items: flex-end;
+      height: 70px;
+      margin-top: 10px;
+    }
+    .stroke{
+      background: #f1f1f1;
+      height: 30%;
+      width: 10px;
+      border-radius: 50px;
+      animation: animate 1.4s linear infinite;
+    }
+    @keyframes animate{
+      50%{ 
+        height: 20%; 
+        background: #4286f4; 
+      }
+      100%{ 
+        height: 100%; 
+      }
+    }
+    .stroke:nth-child(1){ 
+      animation-delay:0s; 
+    }
+    .stroke:nth-child(2){ 
+      animation-delay:0.2s; 
+    }
+    .stroke:nth-child(3){ 
+      animation-delay:0.4s; 
+    }
+    .stroke:nth-child(4){ 
+      animation-delay:0.6s; 
+    }
+    .stroke:nth-child(5){ 
+      animation-delay:0.8s; 
+    }
+    .stroke:nth-child(6){ 
+      animation-delay:1.0s; 
+    }
+    .stroke:nth-child(7){ 
+      animation-delay:1.2s; 
+    }
+
+    .rotate{ 
+      animation: rotation 8s infinite linear; 
+    }
+    @keyframes rotation{ 
+      from{ 
+        transform: rotate(0deg);
+      } 
+      to{ 
+        transform: rotate(359deg);
+      } 
+    }
+
+    .loader 
+    .stroke{ 
+      background:#4286f4; 
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player">
+    <div class="wrapper">
+      <div class="details">
+        <div class="now-playing">PLAYING x OF y</div>
+        <div class="track-art" id="trackArt" style="background-image: url('images.jpg')"></div>
+        <div class="track-name">Track Name</div>
+        <div class="track-artist">Track Artist</div>
+      </div>
+
+      <div class="slider_container">
+        <div class="current-time">00:00</div>
+        <input type="range" min="0" max="100" value="0" class="seek_slider" />
+        <div class="total-duration">00:00</div>
+      </div>
+
+      <div class="slider_container">
+        <i class="fa fa-volume-down"></i>
+        <input type="range" min="0" max="100" value="80" class="volume_slider" />
+        <i class="fa fa-volume-up"></i>
+      </div>
+
+      <div class="buttons">
+        <div class="random-track" title="random"><i class="fas fa-random fa-2x"></i></div>
+        <div class="prev-track" title="prev"><i class="fa fa-step-backward fa-2x"></i></div>
+        <div class="playpause-track" title="play/pause"><i class="fas fa-play-circle fa-5x"></i></div>
+        <div class="next-track" title="next"><i class="fa fa-step-forward fa-2x"></i></div>
+        
+        <!-- Refresh Button -->
+        <div class="refresh-track" title="refresh"><i class="fas fa-redo fa-2x"></i></div> 
+        <div class="repeat-track" title="repeat"><i class="fa fa-repeat fa-2x"></i></div>
+      </div>
+
+
+      <div class="wave">
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+        <span class="stroke"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const now_playing = document.querySelector(".now-playing");
+    const track_art = document.querySelector(".track-art");
+    const track_name = document.querySelector(".track-name");
+    const track_artist = document.querySelector(".track-artist");
+
+    const playpause_btn = document.querySelector(".playpause-track");
+    const next_btn = document.querySelector(".next-track");
+    const prev_btn = document.querySelector(".prev-track");
+    const random_btn = document.querySelector(".random-track");
+    const repeat_btn = document.querySelector(".repeat-track");
+
+    const seek_slider = document.querySelector(".seek_slider");
+    const volume_slider = document.querySelector(".volume_slider");
+    const curr_time = document.querySelector(".current-time");
+    const total_duration = document.querySelector(".total-duration");
+    const wave = document.querySelector(".wave");
+
+    const curr_track = document.createElement("audio");
+
+    let track_index = 0;
+    let isPlaying = false;
+    let isRandom = false;
+    let updateTimer;
+
+    const music_list = [
+      { 
+        img: "images.jpg", 
+        name: "Falling Down", 
+        artist: "wid Cards", 
+        music: "sadSong1.mp3" 
+      },
+      { 
+        img: "images.jpg", 
+        name: "Faded", artist:
+         "Alan Walker",  
+         music: "sadSong2.mp3" 
+      },
+      { 
+        img: "images.jpg", 
+        name: "Rather Be", 
+        artist: "Clean Bandit", 
+        music: "sadSong3.mp3" 
+      }
+    ];
+
+    loadTrack(track_index);
+
+    function loadTrack(index){
+      clearInterval(updateTimer);
+      reset();
+
+      curr_track.src = music_list[index].music;
+      curr_track.load();
+
+      track_art.style.backgroundImage = `url(${music_list[index].img})`;
+      track_name.textContent = music_list[index].name;
+      track_artist.textContent = music_list[index].artist;
+      now_playing.textContent = `Playing music ${index+1} of ${music_list.length}`;
+
+      volume_slider.value = volume_slider.value || 80;
+      curr_track.volume = volume_slider.value / 100;
+
+      updateTimer = setInterval(setUpdate, 1000);
+
+      curr_track.onended = nextTrack;
+      curr_track.onerror = (e) => console.error("Audio load error:", e);
+
+      random_bg_color();
+    }
+
+    function random_bg_color(){
+      const hex = '0123456789abcdef';
+      function makeHex(){
+        let out='';
+        for(let i=0;i<6;i++){
+          out += hex[Math.floor(Math.random()*hex.length)];
+        }
+        return '#'+out;
+      }
+      const color1 = makeHex();
+      const color2 = makeHex();
+      document.body.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+    }
+
+    function reset(){
+      curr_time.textContent = "00:00";
+      total_duration.textContent = "00:00";
+      seek_slider.value = 0;
+    }
+
+    // play/pause
+    function playpauseTrack(){
+      isPlaying ? pauseTrack() : playTrack();
+    }
+    function playTrack(){
+      curr_track.play().then(()=> {
+        isPlaying = true;
+        track_art.classList.add('rotate');
+        wave.classList.add('loader');
+
+        playpause_btn.innerHTML = '<i class="fas fa-pause-circle fa-5x"></i>';
+
+      }).catch(err => {
+        console.log("Play prevented or error:", err);
+      });
+
+    }
+    function pauseTrack(){
+      curr_track.pause();
+      isPlaying = false;
+      track_art.classList.remove('rotate');
+      wave.classList.remove('loader');
+
+      playpause_btn.innerHTML = '<i class="fas fa-play-circle fa-5x"></i>';
+    }
+
+    function nextTrack(){
+      if(track_index < music_list.length - 1 && !isRandom) track_index += 1;
+      else if(isRandom) track_index = Math.floor(Math.random()*music_list.length);
+      else track_index = 0;
+      loadTrack(track_index);
+      playTrack();
+    }
+    
+    function prevTrack(){
+      if(track_index > 0) track_index -= 1;
+      else track_index = music_list.length - 1;
+      loadTrack(track_index);
+      playTrack();
+    }
+
+    function randomTrack(){
+      isRandom = !isRandom;
+      random_btn.classList.toggle('active', isRandom);
+    }
+
+    function repeatTrack(){
+      loadTrack(track_index);
+      playTrack();
+    }
+
+   
+    function seekTo(){
+      if(!isNaN(curr_track.duration)){
+        const seekto = curr_track.duration * (seek_slider.value / 100);
+        curr_track.currentTime = seekto;
+      }
+    }
+
+    function setVolume(){
+      curr_track.volume = volume_slider.value / 100;
+    }
+
+    function setUpdate(){
+      if(!isNaN(curr_track.duration)){
+        const seekPosition = curr_track.currentTime * (100 / curr_track.duration);
+        seek_slider.value = seekPosition;
+
+        const currentMinutes = Math.floor(curr_track.currentTime / 60);
+        const currentSeconds = Math.floor(curr_track.currentTime % 60);
+        const durationMinutes = Math.floor(curr_track.duration / 60);
+        const durationSeconds = Math.floor(curr_track.duration % 60);
+
+        curr_time.textContent = `${String(currentMinutes).padStart(2,'0')}:${String(currentSeconds).padStart(2,'0')}`;
+        total_duration.textContent = `${String(durationMinutes).padStart(2,'0')}:${String(durationSeconds).padStart(2,'0')}`;
+      }
+    }
+
+  
+    playpause_btn.addEventListener('click', playpauseTrack);
+    next_btn.addEventListener('click', nextTrack);
+    prev_btn.addEventListener('click', prevTrack);
+    random_btn.addEventListener('click', randomTrack);
+    repeat_btn.addEventListener('click', repeatTrack);
+
+    seek_slider.addEventListener('input', seekTo);
+    volume_slider.addEventListener('input', setVolume);
+    
+    // refresh button js
+    const refresh_btn = document.querySelector(".refresh-track");
+
+    function refreshTrack(){
+      curr_track.currentTime = 0; 
+      playTrack();                 
+    }
+    refresh_btn.addEventListener('click', refreshTrack);
+
+  </script>
+</body>
+</html>
